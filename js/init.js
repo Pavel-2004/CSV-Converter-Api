@@ -15,7 +15,7 @@ input.addEventListener('change', function(e){
     document.write(today);
 
     const reader = new FileReader()
-    name =  today + "_" + input.files[0]["name"] + "_TradersEdge"
+    name =  today + "_" + input.files[0]["name"] + "_TradersEdge.csv"
     reader.onload = function (){
         content = initAll(reader.result, selectedType)
         result = errorCase(content)
