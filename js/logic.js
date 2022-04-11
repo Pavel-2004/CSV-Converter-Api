@@ -52,9 +52,11 @@ function mapToProperFormat(currentData, args){
     finalValue = []
     finalValue.push(header)
     for (let i = 0; i < final.length; i++) {
-        finalValue.push(final[i])
+        if(!final[i].includes('')){
+            finalValue.push(final[i])
+        }
     }
-
+    console.log(finalValue)
     return downloadCSV(finalValue, 'test.csv', 'text/csv;encoding:utf-8')
 
 }
@@ -70,9 +72,9 @@ function downloadCSV(data, fileName, mimeType){
         csvContent += row + "\r\n";
     });
     var encodedUri = encodeURI(csvContent);
-
     var link = document.createElement("a");
     link.setAttribute("href", encodedUri);
+    console.log(name)
     link.setAttribute("download", name);
     document.body.appendChild(link); // Required for FF
 

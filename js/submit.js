@@ -76,7 +76,20 @@ function questTradeFilter(data){
                 } else{
                     temp.push('other')
                 }
-            } else {
+            } else if(j == 0){
+                myDate = data[i][j]
+                newDate = myDate.split(' ')[0]
+                temp.push(newDate)
+            } else if(j == 1){
+                myDate = data[i][j]
+                newDate = myDate.split(' ')[0]
+                temp.push(newDate)
+            } else if(j == 9){
+                temp.push(Math.abs(data[i][j]))
+            } else if(i == 5){
+                temp.push(Math.abs(data[i][j]))
+            }
+            else {
                 if(!data[i][j]){
                     pushing = false
                 }
