@@ -88,6 +88,8 @@ function questTradeFilter(data){
                 temp.push(Math.abs(data[i][j]))
             } else if(i == 5){
                 temp.push(Math.abs(data[i][j]))
+            } else if(i == 6){
+                temp.push((Math.abs(data[i][9]) / Math.abs(data[i][5]).toFixed(2)))
             }
             else {
                 if(!data[i][j]){
