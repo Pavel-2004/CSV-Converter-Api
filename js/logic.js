@@ -3,14 +3,17 @@ var header = ["Account Num",	'Trade date',	'Settlement date',	'Symbol',	'Exchang
 
 
 function checkArrayEqual(arrayOne, arrayTwo){
+    console.log(arrayOne.length)
     if(arrayOne.length == arrayTwo.length){
         for (let i = 0; i < arrayOne.length; i++) {
             if(arrayOne[i] != arrayTwo[i]){
+                console.log(arrayOne[i], arrayTwo[i])
                 return false
             }
             return true
         }
     } else{
+        console.log("length")
         return false
     }
 
@@ -52,9 +55,7 @@ function mapToProperFormat(currentData, args){
     finalValue = []
     finalValue.push(header)
     for (let i = 0; i < final.length; i++) {
-        if(!final[i].includes('')){
-            finalValue.push(final[i])
-        }
+        finalValue.push(final[i])
     }
     console.log(finalValue)
     return downloadCSV(finalValue, 'test.csv', 'text/csv;encoding:utf-8')
