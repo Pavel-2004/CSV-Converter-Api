@@ -34,6 +34,7 @@ From their the program will take care of everything else
 
 Setting it up:
 1) Inside of the init.js file change the input to whatever id the file upload is inside of your project.
+2) Also selectTypeInput variable in this init.js to the elemend that is a select input which allows you to choose the type of format the original file is in.  
 2) Add a success handler inside of the eventlistener where the commented areas are
 3) Link all the js files inside of your project through script tags
 
@@ -45,3 +46,8 @@ LOGS
 Version 0 - 4/11/22 - Built layout of everything
 - built layout
 - only one original layout works which is the questrade original layout
+
+Version 0.1 - 4/13/22 - Added RBC AND TD
+- Fixed naming of the files 
+- Added a selector option into initializing 
+- Added RBC and TD filtering system
