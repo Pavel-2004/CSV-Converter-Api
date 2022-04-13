@@ -15,6 +15,16 @@ function initAll(result, type){
     if(type == 'questrade'){
         selected = 'questrade'
         return CSVtoArray(result)
+    } else if(type == 'TD'){
+        selected = 'TD'
+        return CSVtoArray(result)
+    } else if(type == 'RBC'){
+        selected = 'RBC'
+        return CSVtoArray(result)
+    }
+
+    else{
+        return false
     }
 }
 
@@ -29,13 +39,36 @@ function errorCase(args){
         if(checkArrayEqual(args[0], ['Transaction Date', 'Settlement Date', 'Action', 'Symbol', 'Description', 'Quantity', 'Price', 'Gross Amount', 'Commission', 'Net Amount', 'Currency', 'Account #', 'Activity Type', 'Account Type\r'])){
             //continue activation process
             return questTradeFilter(args)
+        }
+
+        else{
+            return false
+        }
+
+
+
+
+    } else if(selected == "TD"){
+        console.log(args)
+
+        if(checkArrayEqual(args[3], ['Trade Date', 'Settle Date', 'Description', 'Action', 'Quantity', 'Price', 'Commission', 'Net Amount\r'])){
+            return tdFilter(args)
         } else{
             return false
         }
 
 
-    //case that nothing is selected
-    } else {
+    } else if(selected == "RBC"){
+        if(checkArrayEqual(args[8], ["Date", "Activity", "Symbol", "Symbol Description", "Quantity", "Price", "Settlement", "Account", "Value", "Currency", "Description"])){
+            console.log("here")
+            return rbcFilter(args)
+        } else{
+            console.log("nope")
+            return false
+        }
+    }
+    //case nothing is selected
+    else {
         return false
     }
 
@@ -90,11 +123,11 @@ function questTradeFilter(data){
                 temp.push(Math.abs(data[i][j]))
             } else if(i == 6){
                 temp.push((Math.abs(data[i][9]) / Math.abs(data[i][5]).toFixed(2)))
+            } else if(j == 11){
+                temp.push(data[i][j] + data[i][10])
             }
             else {
-                if(!data[i][j]){
-                    pushing = false
-                }
+
                 temp.push(data[i][j].replace(/(\r\n|\n|\r)/gm, ""))
 
             }
@@ -102,7 +135,9 @@ function questTradeFilter(data){
 
         }
         temp.push('QUESTRADE')
-        if(pushing){
+
+
+        if(data[i][0]){
             final.push(temp)
         }
 
@@ -115,5 +150,199 @@ function questTradeFilter(data){
 
 
 
+function tdFilter(data){
+    final = []
+    lastCharInAccount = ((data[1][1].split(" "))[4]).charAt(((data[1][1].split(" "))[4].length) -1 )
+    accountNum = ((data[1][1].split(" "))[4]).slice(0, -1)
+    if(lastCharInAccount == "E"){
+        accountNum = accountNum + "CAD"
+    } else if(lastCharInAccount == "F"){
+        accountNum = accountNum + "USD"
+    } else{
+        return false
+    }
+
+    for (let i = 4; i < data.length; i++) {
+        temp = []
+        for (let j = 0; j < data[i].length; j++) {
+            if(j == 3){
+                if(data[i][j] == "SELL"){
+                    temp.push("sell")
+                    temp.push(data[i][j])
+                } else if(data[i][j] == "BUY"){
+                    temp.push("buy")
+                    temp.push(data[i][j])
+                } else{
+                    temp.push("unallocated")
+                    temp.push(data[i][j])
+                }
+            } else if (j == 0){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
 
 
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 1){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 4){
+                temp.push(Math.abs(data[i][j]))
+            } else if(j == 5){
+                if(data[i][4] == 0){
+                    temp.push(0)
+                } else{
+                    temp.push((Math.abs(data[i][7]) / Math.abs(data[i][4])).toFixed(2))
+                }
+            } else if(j == 6){
+                if(data[i][j]){
+                    temp.push(parseInt(data[i][j]))
+                } else{
+                    temp.push(0)
+                }
+            } else if(j == 7){
+                temp.push(Math.abs(data[i][j]))
+            }
+            else{
+                temp.push(data[i][j])
+            }
+        }
+        temp.push(accountNum)
+        temp.push("")
+        temp.push("")
+        temp.push("TD")
+        if(data[i][0]){
+            final.push(temp)
+        }
+
+    }
+
+    return mapToProperFormat(final, {9:0, 0:1, 1:2, 11:3, 10:4, 12:5, 4:6, 3:7, 5:8, 6:9, 8:10})
+
+}
+
+function rbcFilter(data){
+    console.log(data)
+    dataReal = []
+    for (let i = 9; i < data.length; i++) {
+        trueValue = ''
+        stopAt = 0
+        charCount = 0
+        temp = []
+        for (let j = 8; j < data[i].length; j++) {
+            if(data[i][j] == "USD" || data[i][j] == "USD"){
+
+                stopAt = j
+                break
+            } else{
+
+                trueValue += data[i][j]
+                charCount++
+                console.log(trueValue)
+            }
+        }
+
+        for (let j = 0; j < stopAt-charCount; j++) {
+            temp.push(data[i][j])
+        }
+
+        temp.push(parseFloat(trueValue.split('\"')[1]))
+
+        for (let j = stopAt; j < stopAt + 2; j++) {
+            temp.push(data[i][j])
+        }
+        if(data[i][0]){
+            dataReal.push(temp)
+        }
+
+    }
+    data = dataReal
+    console.log(data.length)
+    final = []
+    console.log("ready")
+    for (let i = 0; i < data.length; i++) {
+        temp = []
+        console.log("here2")
+        for (let j = 0; j < data[i].length; j++) {
+            console.log("in")
+            if(j == 0){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 1){
+                if(data[i][j] == "Sell"){
+                    temp.push("SELL")
+                    temp.push(data[i][j])
+                } else if(data[i][j] == "Buy"){
+                    temp.push("BUY")
+                    temp.push(data[i][j])
+                } else{
+                    temp.push("unallocated")
+                    temp.push(data[i][j])
+                }
+            } else if(j == 4){
+                temp.push(Math.abs(data[i][j]))
+            } else if(j == 5){
+                if(data[i][4]){
+                    temp.push((Math.abs(data[i][8]) / Math.abs(data[i][4])).toFixed(2))
+
+                } else{
+                    temp.push(0)
+                }
+            } else if(j == 6){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 7){
+
+                temp.push(data[i][j] + data[i][9])
+            } else if(j == 8){
+
+                temp.push(Math.abs(data[i][j]))
+            } else{
+                temp.push(data[i][j])
+            }
+        }
+        temp.push('')
+        temp.push("RBC")
+        final.push(temp)
+
+    }
+
+    console.log(final)
+    return mapToProperFormat(final, {8:0, 0:1, 7:2, 3:3, 12:4, 13:5, 1:6, 2:7, 5:8, 6:9, 9:10})
+
+
+}
