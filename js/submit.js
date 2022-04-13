@@ -90,10 +90,10 @@ function questTradeFilter(data){
         for (let j = 0; j < data[i].length; j++) {
             if(j == 2){
                 if(data[i][j] == 'Buy'){
-                    temp.push('buy')
+                    temp.push('BUY')
                     temp.push(data[i][j])
                 } else if(data[i][j] == 'Sell'){
-                    temp.push('sell')
+                    temp.push('SELL')
                     temp.push(data[i][j])
                 } else{
                     temp.push('unallocated')
