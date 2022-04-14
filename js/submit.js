@@ -1,100 +1,355 @@
-//change this in the case that other columns will be added into the new format
-var header = ["Account #",	'Trade date',	'Settlement date',	'Symbol',	'Exchange',	'Security name',	'TE type',	'Broker type',	'#units',	'$price/unit',	'Amount']
+/*
 
+1) Step 1 is to take all of the data and convert it into list format. This is the data that will be submitted
+2) Step 2 is to filter that data. For example split some data like CJ.TO turn into CJ as one column and TO turns into TSX as another column. This will be either to plug into the converter function
+3) Map out all of the data into the converter function
+4) Once user click download activate the function
 
-var filename
+ */
 
-function setFileName(name){
+var selected = ''
 
-    filename = name
+//initializing everything: step 1
+function initAll(result, type){
+    //add other types
+    if(type == 'questrade'){
+        selected = 'questrade'
+        return CSVtoArray(result)
+    } else if(type == 'TD'){
+        selected = 'TD'
+        return CSVtoArray(result)
+    } else if(type == 'RBC'){
+        selected = 'RBC'
+        return CSVtoArray(result)
+    }
+
+    else{
+        return false
+    }
 }
 
-function checkArrayEqual(arrayOne, arrayTwo){
 
-    if(arrayOne.length == arrayTwo.length){
-        for (let i = 0; i < arrayOne.length; i++) {
-            if(arrayOne[i] != arrayTwo[i]){
-                return false
-            }
-            return true
+
+//detection for error cases. Will return false if error detected
+function errorCase(args){
+    //add if statement for new type in error case here
+
+    //questrade
+    if(selected == 'questrade'){
+        if(checkArrayEqual(args[0], ['Transaction Date', 'Settlement Date', 'Action', 'Symbol', 'Description', 'Quantity', 'Price', 'Gross Amount', 'Commission', 'Net Amount', 'Currency', 'Account #', 'Activity Type', 'Account Type\r'])){
+            //continue activation process
+            return questTradeFilter(args)
         }
-    } else{
+
+        else{
+            return false
+        }
+
+
+
+
+    } else if(selected == "TD"){
+        console.log(args)
+
+        if(checkArrayEqual(args[3], ['Trade Date', 'Settle Date', 'Description', 'Action', 'Quantity', 'Price', 'Commission', 'Net Amount\r'])){
+            return tdFilter(args)
+        } else{
+            return false
+        }
+
+
+    } else if(selected == "RBC"){
+        if(checkArrayEqual(args[8], ["Date", "Activity", "Symbol", "Symbol Description", "Quantity", "Price", "Settlement", "Account", "Value", "Currency", "Description"])){
+            console.log("here")
+            return rbcFilter(args)
+        } else{
+            console.log("nope")
+            return false
+        }
+    }
+    //case nothing is selected
+    else {
         return false
     }
 
+
+
 }
 
 
-function CSVtoArray(text) {
-    final = text.split('\n').map(function (line){
-        return line.split(',')
-    })
-    return errorCase(final)
-};
 
 
-//takes in format of {originalIndex:newIndex}. Rearranges the function
-function mapToProperFormat(currentData, args){
+//filtering data. All of the different filter functions go here
+
+//filtering for questrade
+function questTradeFilter(data){
+    console.log(data)
     final = []
 
-    //initializes the array
-    for (let i = 0; i < currentData.length; i++) {
-        add = []
-        for (let j = 0; j < Object.keys(args).length; j++) {
-            add.push('')
+    for (let i = 1; i < data.length; i++) {
+        temp = []
+        pushing = true
+
+        for (let j = 0; j < data[i].length; j++) {
+
+
+            if(j == 2){
+                if(data[i][j] == 'Buy'){
+                    temp.push('BUY')
+                    temp.push(data[i][j])
+                } else if(data[i][j] == 'Sell'){
+                    temp.push('SELL')
+                    temp.push(data[i][j])
+                } else{
+                    temp.push('unallocated')
+                    temp.push(data[i][j])
+                }
+            } else if(j == 11){
+                temp.push(data[i][j] + data[i][10])
+
+            } else if(j == 4){
+                name = data[i][4].split("COM")[0]
+                console.log(name)
+                temp.push(name)
+            } else if(j == 3){
+                symbol = data[i][j].split('.')
+                temp.push(symbol[0])
+                if(symbol[1] == 'TO'){
+                    temp.push('TSX')
+                } else if(symbol[1] == 'VN'){
+                    temp.push('TSXV')
+                } else{
+                    temp.push('other')
+                }
+            } else if(j == 0){
+                myDate = data[i][j]
+                newDate = myDate.split(' ')[0]
+                temp.push(newDate)
+            } else if(j == 1){
+                myDate = data[i][j]
+                newDate = myDate.split(' ')[0]
+                temp.push(newDate)
+            } else if(j == 9){
+                temp.push(Math.abs(data[i][9]))
+            } else if(j == 5){
+                temp.push(Math.abs(data[i][j]))
+            } else if(j == 6){
+                temp.push((Math.abs(data[i][9]) / Math.abs(data[i][5]).toFixed(4)))
+            }
+            else {
+
+                temp.push(data[i][j].replace(/(\r\n|\n|\r)/gm, ""))
+
+            }
+
+
         }
-        final.push(add)
+
+
+
+
+
+        if(data[i][0]){
+            temp.push(data[i][4].split(" COM ")[0])
+            final.push(temp)
+        }
+
     }
-    //maps everything out
-    for (let i = 0; i < currentData.length; i++) {
-        for (let j = 0; j < currentData[i].length; j++) {
-            if(Object.keys(args).includes(String(j))){
-                final[i][args[j]] = currentData[i][j]
+
+
+    //converts all of the important columns into proper format
+    return mapToProperFormat(final,{13:0, 0:1, 1:2, 4:3, 5:4, 16:5, 3:6, 2:7, 7:8, 8:9, 11:10})
+}
+
+
+
+function tdFilter(data){
+    final = []
+    lastCharInAccount = ((data[1][1].split(" "))[4]).charAt(((data[1][1].split(" "))[4].length) -1 )
+    accountNum = data[1][1].split(" - ")[1]
+
+
+    for (let i = 4; i < data.length; i++) {
+        temp = []
+        for (let j = 0; j < data[i].length; j++) {
+            if(j == 3){
+                if(data[i][j] == "SELL"){
+                    temp.push("sell")
+                    temp.push(data[i][j])
+                } else if(data[i][j] == "BUY"){
+                    temp.push("buy")
+                    temp.push(data[i][j])
+                } else{
+                    temp.push("unallocated")
+                    temp.push(data[i][j])
+                }
+            } else if (j == 0){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 1){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 4){
+                temp.push(Math.abs(data[i][j]))
+            } else if(j == 5){
+                if(data[i][4] == 0){
+                    temp.push(0)
+                } else{
+                    temp.push((Math.abs(data[i][7]) / Math.abs(data[i][4])).toFixed(4))
+                }
+            } else if(j == 6){
+                if(data[i][j]){
+                    temp.push(parseInt(data[i][j]))
+                } else{
+                    temp.push(0)
+                }
+            } else if(j == 7){
+                temp.push(Math.abs(data[i][j]))
+            }
+            else{
+                temp.push(data[i][j])
             }
         }
+        temp.push(accountNum)
+        temp.push("")
+        temp.push("")
+        temp.push(data[i][2])
+        if(data[i][0]){
+            final.push(temp)
+        }
+
     }
 
+    return mapToProperFormat(final, {9:0, 0:1, 1:2, 11:3, 10:4, 12:5, 4:6, 3:7, 5:8, 6:9, 8:10})
 
-    finalValue = []
-    finalValue.push(header)
-    for (let i = 0; i < final.length; i++) {
-        finalValue.push(final[i])
+}
+
+function rbcFilter(data){
+    console.log(data)
+    dataReal = []
+    for (let i = 9; i < data.length; i++) {
+        trueValue = ''
+        stopAt = 0
+        charCount = 0
+        temp = []
+        for (let j = 8; j < data[i].length; j++) {
+            if(data[i][j] == "USD" || data[i][j] == "USD"){
+
+                stopAt = j
+                break
+            } else{
+
+                trueValue += data[i][j]
+                charCount++
+                console.log(trueValue)
+            }
+        }
+
+        for (let j = 0; j < stopAt-charCount; j++) {
+            temp.push(data[i][j])
+        }
+
+        temp.push(parseFloat(trueValue.split('\"')[1]))
+
+        for (let j = stopAt; j < stopAt + 2; j++) {
+            temp.push(data[i][j])
+        }
+        if(data[i][0]){
+            dataReal.push(temp)
+        }
+
+    }
+    data = dataReal
+    console.log(data.length)
+    final = []
+    console.log("ready")
+    for (let i = 0; i < data.length; i++) {
+        temp = []
+        console.log("here2")
+        for (let j = 0; j < data[i].length; j++) {
+            console.log("in")
+            if(j == 0){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 1){
+                if(data[i][j] == "Sell"){
+                    temp.push("SELL")
+                    temp.push(data[i][j])
+                } else if(data[i][j] == "Buy"){
+                    temp.push("BUY")
+                    temp.push(data[i][j])
+                } else{
+                    temp.push("unallocated")
+                    temp.push(data[i][j])
+                }
+            } else if(j == 4){
+                temp.push(Math.abs(data[i][j]))
+            } else if(j == 5){
+                if(data[i][4]){
+                    temp.push((Math.abs(data[i][8]) / Math.abs(data[i][4])).toFixed(4))
+
+                } else{
+                    temp.push(0)
+                }
+            } else if(j == 6){
+                date = new Date(data[i][j])
+                month = date.getMonth() + 1
+                day = date.getDate()
+                year = date.getFullYear()
+
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                temp.push(month+"/"+day+"/"+year)
+            } else if(j == 7){
+
+                temp.push(data[i][j] + data[i][9])
+            } else if(j == 8){
+
+                temp.push(Math.abs(data[i][j]))
+            } else{
+                temp.push(data[i][j])
+            }
+        }
+        temp.push('')
+        temp.push(data[i][3])
+        final.push(temp)
+
     }
 
-    return arrayToCsv(finalValue, 'test.csv', 'text/csv;encoding:utf-8')
+    console.log(final)
+    return mapToProperFormat(final, {8:0, 0:1, 7:2, 3:3, 12:4, 13:5, 1:6, 2:7, 5:8, 6:9, 9:10})
+
 
 }
-
-function arrayToCsv(data, type){
-    final = data.map(row =>
-        row
-            .map(String)
-            .map(v => v.replaceAll('"', '""'))
-            .map(v => `"${v}"`)
-            .join(',')
-    ).join('\r\n');
-    downloadBlob(final, type)
-}
-
-
-function downloadBlob(content, contentType) {
-    today = new Date();
-    dd = String(today.getDate()).padStart(2, '0');
-    mm = String(today.getMonth() + 1).padStart(2, '0');
-    yyyy = today.getFullYear();
-    today = mm + '/' + dd + '/' + yyyy;
-    filename = today + "_traders_edge_"+ input.files[0]["name"]
-
-
-
-    console.log(filename)
-    var blob = new Blob([content], { type: contentType });
-    var url = URL.createObjectURL(blob);
-
-    var pom = document.createElement('a');
-    pom.href = url;
-    pom.setAttribute('download', filename);
-    pom.click();
-}
-
-
