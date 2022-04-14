@@ -1,7 +1,6 @@
 //set the input which will take in the csv
 const input = document.getElementById("csv")
 const selectedTypeInput = document.getElementById("type")
-var filename = ''
 var options = ["questrade", "TD", "RBC"]
 for (let i = 0; i < options.length; i++) {
     if(i == 0){
@@ -17,8 +16,8 @@ input.addEventListener('change', function(e){
     //this is temporary until more types are addeda
 
     const reader = new FileReader()
+    selectedType = selectedTypeInput.value
 
-    setFileName(today + "_traders_edge_"+ input.files[0]["name"])
     reader.onload = function (){
         content = initAll(reader.result, selectedType)
 
