@@ -231,8 +231,10 @@ function tdFilter(data){
         temp.push(accountNum)
         temp.push("")
         temp.push("")
-        temp.push(data[i][2])
         if(data[i][0]){
+            console
+            console.log(temp)
+            temp.push(filterDescriptionTD(data[i][2]))
             final.push(temp)
         }
 
