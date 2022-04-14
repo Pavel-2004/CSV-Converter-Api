@@ -2,12 +2,7 @@
 var header = ["Account #",	'Trade date',	'Settlement date',	'Symbol',	'Exchange',	'Security name',	'TE type',	'Broker type',	'#units',	'$price/unit',	'Amount']
 
 
-var filename
 
-function setFileName(name){
-
-    filename = name
-}
 
 function checkArrayEqual(arrayOne, arrayTwo){
 
