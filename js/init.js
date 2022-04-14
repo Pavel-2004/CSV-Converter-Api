@@ -1,6 +1,6 @@
 //set the input which will take in the csv
 
-console.log("here")
+
 const input = document.getElementById("csv")
 const selectedTypeInput = document.getElementById("type")
 var options = ["questrade", "TD", "RBC"]
