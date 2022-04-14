@@ -51,3 +51,12 @@ Version 0.1 - 4/13/22 - Added RBC AND TD
 - Fixed naming of the files 
 - Added a selector option into initializing 
 - Added RBC and TD filtering system
+
+Version 0.2 - 4/14/22 - Fixes 
+- Fixed column names
+- Fixed security codes
+- prices made more accurate
+- TD account number fix
+- questrade unit# is now posotive
+- last row in questrade fixed to appearing as CAD
+
