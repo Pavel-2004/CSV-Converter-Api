@@ -93,3 +93,17 @@ function downloadBlob(content, contentType) {
 }
 
 
+
+function filterDescriptionTD(data){
+    all = data.split(" ")
+    finalData = ""
+    for (let i = 0; i < all.length; i++) {
+        if(/\d/.test(all[i])){
+            break
+        } else{
+            finalData = finalData + " " + all[i]
+        }
+    }
+
+    return finalData
+}
