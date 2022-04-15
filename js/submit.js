@@ -136,7 +136,7 @@ function questTradeFilter(data){
             } else if(j == 5){
                 temp.push(Math.abs(data[i][j]))
             } else if(j == 6){
-                temp.push((Math.abs(data[i][9]) / Math.abs(data[i][5]).toFixed(4)))
+                temp.push((Math.abs(data[i][9]) / Math.abs(data[i][5]).toFixed(15)))
             }
             else {
 
@@ -216,7 +216,7 @@ function tdFilter(data){
                 if(data[i][4] == 0){
                     temp.push(0)
                 } else{
-                    temp.push((Math.abs(data[i][7]) / Math.abs(data[i][4])).toFixed(4))
+                    temp.push((Math.abs(data[i][7]) / Math.abs(data[i][4])).toFixed(15))
                 }
             } else if(j == 6){
                 if(data[i][j]){
@@ -248,7 +248,6 @@ function tdFilter(data){
 }
 
 function rbcFilter(data){
-    console.log(data)
     dataReal = []
     for (let i = 9; i < data.length; i++) {
         trueValue = ''
@@ -321,7 +320,7 @@ function rbcFilter(data){
                 temp.push(Math.abs(data[i][j]))
             } else if(j == 5){
                 if(data[i][4]){
-                    temp.push((Math.abs(data[i][8]) / Math.abs(data[i][4])).toFixed(4))
+                    temp.push((Math.abs(data[i][8]) / Math.abs(data[i][4])).toFixed(15))
 
                 } else{
                     temp.push(0)
