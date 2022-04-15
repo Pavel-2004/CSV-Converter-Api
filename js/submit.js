@@ -36,6 +36,7 @@ function errorCase(args){
 
     //questrade
     if(selected == 'questrade'){
+        //this validates the proper format of the file.
         if(checkArrayEqual(args[0], ['Transaction Date', 'Settlement Date', 'Action', 'Symbol', 'Description', 'Quantity', 'Price', 'Gross Amount', 'Commission', 'Net Amount', 'Currency', 'Account #', 'Activity Type', 'Account Type\r'])){
             //continue activation process
             return questTradeFilter(args)
@@ -59,6 +60,7 @@ function errorCase(args){
 
 
     } else if(selected == "RBC"){
+
         if(checkArrayEqual(args[8], ["Date", "Activity", "Symbol", "Symbol Description", "Quantity", "Price", "Settlement", "Account", "Value", "Currency", "Description"])){
             console.log("here")
             return rbcFilter(args)
@@ -92,7 +94,7 @@ function questTradeFilter(data){
 
         for (let j = 0; j < data[i].length; j++) {
 
-
+            //looks through every column by index and changes it based on requirements
             if(j == 2){
                 if(data[i][j] == 'Buy'){
                     temp.push('BUY')
@@ -172,6 +174,7 @@ function tdFilter(data){
     for (let i = 4; i < data.length; i++) {
         temp = []
         for (let j = 0; j < data[i].length; j++) {
+            //looks through every column by index and changes it based on requirements
             if(j == 3){
                 if(data[i][j] == "SELL"){
                     temp.push("sell")
@@ -252,6 +255,7 @@ function rbcFilter(data){
         stopAt = 0
         charCount = 0
         temp = []
+        //looks through every column by index and changes it based on requirements
         for (let j = 8; j < data[i].length; j++) {
             if(data[i][j] == "USD" || data[i][j] == "USD"){
 
@@ -288,6 +292,7 @@ function rbcFilter(data){
         console.log("here2")
         for (let j = 0; j < data[i].length; j++) {
             console.log("in")
+            //looks through every column by index and changes it based on requirements
             if(j == 0){
                 date = new Date(data[i][j])
                 month = date.getMonth() + 1
