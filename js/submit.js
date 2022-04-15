@@ -152,7 +152,7 @@ function questTradeFilter(data){
 
 
         if(data[i][0]){
-            temp.push(data[i][4].split(" COM ")[0])
+            temp.push(data[i][4])
             final.push(temp)
         }
 
@@ -237,7 +237,7 @@ function tdFilter(data){
         if(data[i][0]){
             console
             console.log(temp)
-            temp.push(filterDescriptionTD(data[i][2]))
+            temp.push(data[i][2])
             final.push(temp)
         }
 
