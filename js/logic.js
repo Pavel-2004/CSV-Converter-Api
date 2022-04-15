@@ -68,7 +68,7 @@ function arrayToCsv(data, type){
             .map(v => `"${v}"`)
             .join(',')
     ).join('\r\n');
-    downloadBlob(final, type)
+    return downloadBlob(final, type)
 }
 
 
@@ -90,6 +90,7 @@ function downloadBlob(content, contentType) {
     pom.href = url;
     pom.setAttribute('download', filename);
     pom.click();
+    return true
 }
 
 
